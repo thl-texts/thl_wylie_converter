@@ -19,7 +19,9 @@ class Line:
             self.ln = int(m.group(3))
         self.ms = []
         self.section = lnin[1].text
-        self.wylie = massage_wylie(lnin[2].text)
+        eltxt = lnin[2].text
+        self.missing = (eltxt == 'missing')
+        self.wylie = massage_wylie(lnin[2].text) if not self.missing and eltxt is not None else ''
         self.tib = ''
         self.conv_error = ''
 
@@ -28,15 +30,23 @@ class Line:
 
     # Needs to return a list in case it is line one and we need to also include page milestone
     def get_milestone(self):
-        if len(self.ms) == 0:   # self.ms may contain a list of optional comment and milestones if already processed
-            if self.ln == 1:
-                self.ms.append(E.milestone(unit="page", n=str(self.seqpg)))
-            self.ms.append(E.milestone(unit="line", n=f"{self.seqpg}.{self.ln}"))
-            # If there was a conversion problem insert comment about it
-            if self.conv_error:
-                self.ms.append(Comment("Wylie Conv Errors: \n\t\t" + self.conv_error.replace('line 1:', '', 1)
-                                       .replace("\n", " ").replace("line 1:", "\n\t\t")
-                                        + "\n\t\tOriginal Wylie: \n\t\t" + self.wylie))
+        # self.ms may contain a list of optional comment and milestones if already processed
+        if len(self.ms) == 0 and self.ln == 1:
+            pgms = E.milestone(unit="page", n=str(self.seqpg))
+            if self.missing:
+                pgms.set('rend', 'missing')
+                self.ms.append(pgms)
+                self.ms.append(E.milestone(unit="page", n=str(self.seqpg + 1), rend="missing"))
+                return self.ms
+            else:
+                self.ms.append(pgms)
+                # If there was a conversion problem insert comment about it
+                if self.conv_error:
+                    self.ms.append(Comment("Wylie Conv Errors: \n\t\t" + self.conv_error.replace('line 1:', '', 1)
+                                           .replace("\n", " ").replace("line 1:", "\n\t\t")
+                                            + "\n\t\tOriginal Wylie: \n\t\t" + self.wylie))
+
+        self.ms.append(E.milestone(unit="line", n=f"{self.seqpg}.{self.ln}"))
         return self.ms
 
 

@@ -41,7 +41,7 @@ class Converter:
             for ms in mss:
                 last_ms = ms
                 p.append(ms)
-            last_ms.tail = ln.tib
+                last_ms.tail = ln.tib
         return xmltxt
 
     def write_xml(self, fnm):
