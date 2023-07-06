@@ -51,5 +51,5 @@ class Converter:
 
     def convert_line(self, ln):
         unitib = self.converter.toUnicode(ln.wylie)
-        ln.tib = unitib
+        ln.tib = unitib.replace(r'༎', r'།།')  # convert single character double shad into two single shads
 

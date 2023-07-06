@@ -1,7 +1,7 @@
 import requests
 from lxml.etree import Comment
 from lxml.builder import E
-from re import match
+from re import match, sub
 
 
 class Line:
@@ -44,6 +44,12 @@ def massage_wylie(wy):
     if wy and len(wy) > 0:
         if wy[-1] not in ['/', ' ']:
             wy = wy + ' '
-        wy = wy.replace('/ ', '/_')
+        wy = sub(r'////\s?', r'//_//', wy)
+        wy = sub(r'//\s', r'/_/', wy)
+        wy = sub(r'([^_])//([^_])', r'\1/_/\2', wy)
+        wy = sub(r'_/\s', r'_/', wy)
+        wy = sub(r'/ ', r'/_', wy)
+        wy = sub(r'ng/_', r'ng /_', wy)
+        wy = sub(r'g/_', r'g_/', wy)
     return wy
 
